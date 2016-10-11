@@ -9,10 +9,8 @@ import HttpServer
 
 port = "/dev/cu.usbmodem1421"
 baudRate = 9600
-
-threshold = 90
-uname = "superman"
-pswd = "Admin123"
+userName = "superman"
+password = "Admin123"
 
 print "Monitoring temperature"
 
@@ -48,7 +46,7 @@ def recognizePatientAndUpdateObservation(key, avgValue):
     print "Saving in Bahmni =>", uuid, avgValue, #, "=>", payload
     # print payload
     headers = {"Content-type": "application/json;charset=UTF-8",
-               'Cookie': BahmniServerHelper().getAuthenticatedCookie(uname, pswd)}
+               'Cookie': BahmniServerHelper().getAuthenticatedCookie(userName, password)}
     # print headers
     conn = httplib.HTTPSConnection("192.168.33.10", context=ssl._create_unverified_context())
     conn.request("POST", "/openmrs/ws/rest/v1/bahmnicore/bahmniencounter", payload, headers)
@@ -64,8 +62,9 @@ def recognizePatientAndUpdateObservation(key, avgValue):
 # recognizePatientAndUpdateObservation('Temperature', 25)
 
 while True:
+    thresholdValue = 90
     value = getAbsoluteTemperatureFromSerial()
-    isValid = value > threshold
+    isValid = value > thresholdValue
     if isValid:
         print "calculating avg temp =>"
         avgValue = getAverageValue()
@@ -73,7 +72,7 @@ while True:
         recognizePatientAndUpdateObservation('Temperature', avgValue)
         isValid = False
         value = getAbsoluteTemperatureFromSerial()
-        while value > threshold:
+        while value > thresholdValue:
             print "Resetting sensor temperature, current=>%.2f" % value
             time.sleep(3)
             value = getAbsoluteTemperatureFromSerial()
